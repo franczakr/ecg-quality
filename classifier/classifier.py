@@ -1,12 +1,8 @@
-import random
-
 import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import confusion_matrix
-
-from util import data_reader
 
 
 class Classifier:
@@ -15,8 +11,6 @@ class Classifier:
         self.classifier = LogisticRegression()
 
     def train(self, autoencoder: nn.Module, slices: np.ndarray, classes: np.ndarray):
-        slices, classes = self._get_random_data_for_train(slices, classes)
-
         loss = self._get_loss(autoencoder, slices)
         loss_matrix = loss.reshape(-1, 1)
 
@@ -24,7 +18,7 @@ class Classifier:
 
         predictions = self.classifier.predict(loss_matrix)
 
-        print("CLASSIER TRAIN RESULTS:")
+        print("CLASSIER TRAIN DATASET RESULTS:")
         TN, FP, FN, TP = confusion_matrix(classes, predictions).ravel()
         print('True Positive(TP)  = ', TP)
         print('False Positive(FP) = ', FP)
@@ -40,21 +34,11 @@ class Classifier:
         return slices, predictions
 
     def _get_loss(self, autoencoder, slices: np.ndarray):
+        device = 'cpu'
+        autoencoder = autoencoder.to(device)
         autoencoder.eval()
         with torch.no_grad():
-            input = torch.tensor(slices)
+            input = torch.tensor(slices).to(device)
             output = autoencoder(input)
             loss = np.array([autoencoder.loss_func(input[i], output[i]) for i in range(len(input))])
         return loss
-
-    def _get_random_data_for_train(self, slices: np.ndarray, classes: np.ndarray, count=1000) -> (
-            np.ndarray, np.ndarray):
-        slices_gq = [gq for gq in list(zip(slices, classes)) if gq[1] == data_reader.GOOD_QUALITY]
-        slices_bq = [bq for bq in list(zip(slices, classes)) if bq[1] == data_reader.BAD_QUALITY]
-        slices_gq_random = random.sample(slices_gq, count)
-        slices_bq_random = random.sample(slices_bq, count)
-        data = slices_gq_random + slices_bq_random
-        random.shuffle(data)
-        slices = np.array([x[0] for x in data])
-        classes = np.array([x[1] for x in data])
-        return slices, classes
