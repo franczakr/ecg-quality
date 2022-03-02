@@ -3,6 +3,7 @@ import random
 
 import numpy
 import numpy as np
+from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 
 from ae import train_AE
 from ae.AESimple import AESimple
@@ -26,18 +27,28 @@ def main(train: bool):
 
     classifier = Classifier()
 
-    slices_for_train_classifier, classes_for_train_classifier = _get_random_data_for_train(slices,
-                                                                                           classes)  # TODO change to split data to train and test
+    slices_for_train_classifier, classes_for_train_classifier = _get_random_data(slices, classes)  # TODO change to split data to train and test
 
     classifier.train(autoencoder, slices_for_train_classifier, classes_for_train_classifier)
 
-    # TODO add test data accuracy and f1 calculation
+    predictions = classifier.classify(autoencoder, slices)
+
+    print("CLASSIER RESULTS:")
+    TN, FP, FN, TP = confusion_matrix(classes, predictions).ravel()
+    print('True Positive(TP)  = ', TP)
+    print('False Positive(FP) = ', FP)
+    print('True Negative(TN)  = ', TN)
+    print('False Negative(FN) = ', FN)
+    print(f'Accuracy: {accuracy_score(classes, predictions)}')
+    print(f'Precision: {precision_score(classes, predictions)}')
+    print(f'Recall: {recall_score(classes, predictions)}')
+    print(f'F1: {f1_score(classes, predictions)}')
 
 
 """
     Chooses randomly count Good quality and Bad quality samples
 """
-def _get_random_data_for_train(slices: np.ndarray, classes: np.ndarray, count=1000) -> (np.ndarray, np.ndarray):
+def _get_random_data(slices: np.ndarray, classes: np.ndarray, count=1000) -> (np.ndarray, np.ndarray):
     slices_gq = [gq for gq in list(zip(slices, classes)) if gq[1] == data_reader.GOOD_QUALITY]
     slices_bq = [bq for bq in list(zip(slices, classes)) if bq[1] == data_reader.BAD_QUALITY]
     slices_gq_random = random.sample(slices_gq, count)

@@ -2,7 +2,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix
 
 
 class Classifier:
@@ -16,22 +15,11 @@ class Classifier:
 
         self.classifier.fit(loss_matrix, classes)
 
-        predictions = self.classifier.predict(loss_matrix)
-
-        print("CLASSIER TRAIN DATASET RESULTS:")
-        TN, FP, FN, TP = confusion_matrix(classes, predictions).ravel()
-        print('True Positive(TP)  = ', TP)
-        print('False Positive(FP) = ', FP)
-        print('True Negative(TN)  = ', TN)
-        print('False Negative(FN) = ', FN)
-        accuracy = (TP + TN) / (TP + FP + TN + FN)
-        print('Accuracy of the binary classification = {:0.3f}'.format(accuracy))
-
     def classify(self, autoencoder: nn.Module, slices: np.ndarray) -> (np.ndarray, np.ndarray):
         loss = self._get_loss(autoencoder, slices)
         loss_matrix = loss.reshape(-1, 1)
         predictions = self.classifier.predict(loss_matrix)
-        return slices, predictions
+        return predictions
 
     def _get_loss(self, autoencoder, slices: np.ndarray):
         device = 'cpu'

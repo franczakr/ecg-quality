@@ -11,7 +11,6 @@ PREPRECESSED_FILENAME = 'preprocessed.pkl'
 SAMPLING_RATE = 125
 ORIGINAL_SAMPLING_RATE = 300
 
-WND_LEN_RATIO = 2.5  # ratio of the slice length
 POSITION_OF_MAX = 200  # position of the sample with the greatest abs amplitude [ms]
 
 BASELINE_FILTER_LEN_T = 600  # [ms]
@@ -20,7 +19,7 @@ BASELINE_FILTER_LEN_QRS_P = 200  # [ms]
 IDX_OF_PEAK = int(POSITION_OF_MAX / 1000.0 * SAMPLING_RATE)
 
 SLICE_LENGTH = int(0.8 * SAMPLING_RATE)  # 0.8 second based on sampling rate
-CONTEXT_LEN = int(round(WND_LEN_RATIO * SLICE_LENGTH))
+CONTEXT_LEN = int(round(2.5 * SLICE_LENGTH))
 
 
 def split_into_slices(fragments: List[np.ndarray], classes: List[int]) -> (np.ndarray, np.ndarray, np.ndarray, int):
@@ -32,6 +31,7 @@ def split_into_slices(fragments: List[np.ndarray], classes: List[int]) -> (np.nd
         fragment = resample(fragment, int(SAMPLING_RATE * len(fragment) / ORIGINAL_SAMPLING_RATE))
         fragment = _cancel_baseline(fragment)
         fragment = _subtract_mean(fragment)
+        fragment = np.clip(fragment, -6000, 6000)
         slices, slices_with_context = _generate_slices(fragment)
         fragments_sliced.append(slices)
         fragments_sliced_with_context.append(slices_with_context)
