@@ -30,9 +30,6 @@ def load_train_data_and_labels(limit: int = None) -> List[Tuple[str, np.ndarray,
     with open(labels_file, newline='') as csvfile:
         train_labels = dict(csv.reader(csvfile))
 
-    for key, value in train_labels.items():
-        train_labels[key] = BAD_QUALITY if value == '~' else GOOD_QUALITY
-
     train = [(name, train_data[name], train_labels[name]) for name in train_data.keys()]
 
     return train
