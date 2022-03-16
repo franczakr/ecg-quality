@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.data import DataLoader, TensorDataset
 
 
 def train_ae(autoencoder: nn.Module, train_dataset: np.ndarray, epochs: int) -> nn.Module:
@@ -11,8 +12,8 @@ def train_ae(autoencoder: nn.Module, train_dataset: np.ndarray, epochs: int) -> 
 
     optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
 
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=128, shuffle=True, num_workers=4, pin_memory=True
+    train_loader = DataLoader(
+        TensorDataset(torch.tensor(train_dataset)), batch_size=128, shuffle=True, num_workers=4, pin_memory=True
     )
 
     print("AE training started")
