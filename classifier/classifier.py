@@ -19,12 +19,15 @@ class Classifier:
         bins = 200
         min = np.min(bq_loss)
         max = np.max(gq_loss)
-        gq_hist = np.histogram(gq_loss, bins=bins, range=(min, max), density=True)
-        bq_hist = np.histogram(bq_loss, bins=bins, range=(min, max), density=True)
+        gq_hist = np.histogram(gq_loss, bins=bins, range=(min, max))
+        bq_hist = np.histogram(bq_loss, bins=bins, range=(min, max))
+
+        gq_density = gq_hist[0] / sum(gq_hist[0])
+        bq_density = bq_hist[0] / sum(bq_hist[0])
 
         index = None
-        for i in range(len(gq_hist[0])):
-            if bq_hist[0][i] - gq_hist[0][i] > 0 and bq_hist[0][i + 1] - gq_hist[0][i + 1] > 0:
+        for i in range(len(gq_density)):
+            if bq_density[i] - gq_density[i] > 0 and bq_density[i + 1] - gq_density[i + 1] > 0:
                 index = i
                 break
 
