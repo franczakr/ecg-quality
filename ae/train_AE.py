@@ -22,7 +22,7 @@ def train_ae(autoencoder: nn.Module, train_dataset: np.ndarray, epochs: int) -> 
         loss = 0
 
         for input_batch in train_loader:
-            input_batch = input_batch.to(device)
+            input_batch = input_batch[0].to(device)
             optimizer.zero_grad()
             output_batch = autoencoder(input_batch)
             train_loss = autoencoder.loss_func(output_batch, input_batch)
