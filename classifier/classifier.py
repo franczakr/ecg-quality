@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from util import config
 from util.data_reader import GOOD_QUALITY, BAD_QUALITY
 
 
@@ -42,7 +43,7 @@ class Classifier:
         return [BAD_QUALITY if l > self.treshold else GOOD_QUALITY for l in loss]
 
     def _get_loss(self, autoencoder, slices: np.ndarray):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        device = config.DEVICE
         autoencoder = autoencoder.to(device)
         autoencoder.eval()
         with torch.no_grad():

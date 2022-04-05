@@ -1,10 +1,9 @@
-import torch
 import torch.nn as nn
 
 
 class AESimple(nn.Module):
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         super().__init__()
 
         self.loss_func = nn.MSELoss()
@@ -14,8 +13,6 @@ class AESimple(nn.Module):
 
         self.decoder_layer_1 = nn.Linear(in_features=125,
                                          out_features=100)
-
-        self.elu = torch.nn.ELU()
 
     def forward(self, features):
         encoded = self.encoder_layer_1(features)

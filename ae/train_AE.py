@@ -1,22 +1,28 @@
+import math
+
 import numpy as np
+import optuna.exceptions
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 
+from util import config
 
-def train_ae(autoencoder: nn.Module, train_dataset: np.ndarray, epochs: int) -> nn.Module:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def train_ae(autoencoder: nn.Module, train_dataset: np.ndarray, epochs: int, lr: float = 1e-3,
+             batch_size: int = 128) -> nn.Module:
+    device = config.DEVICE
 
     autoencoder = autoencoder.to(device)
 
-    optimizer = optim.Adam(autoencoder.parameters(), lr=1e-3)
+    optimizer = optim.Adam(autoencoder.parameters(), lr=lr)
 
     train_loader = DataLoader(
-        TensorDataset(torch.tensor(train_dataset)), batch_size=128, shuffle=True, num_workers=4, pin_memory=True
+        TensorDataset(torch.tensor(train_dataset)), batch_size=batch_size, shuffle=True, pin_memory=True
     )
 
-    print("AE training started")
+    # print("AE training started")
 
     for epoch in range(epochs):
         loss = 0
@@ -32,8 +38,11 @@ def train_ae(autoencoder: nn.Module, train_dataset: np.ndarray, epochs: int) -> 
 
         loss = loss / len(train_loader)
 
-        print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, epochs, loss))
+        if loss > 100000000 or math.isnan(loss):
+            raise optuna.exceptions.TrialPruned()
 
-    print("ok")
+        # print("epoch : {}/{}, loss = {:.6f}".format(epoch + 1, epochs, loss))
+
+    # print("AE training finished")
 
     return autoencoder
