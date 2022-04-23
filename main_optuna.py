@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 from ae import train_AE
 from ae.AESimpleOptuna import AESimpleOptuna
-from classifier.classifier import Classifier
+from classifier.simple_classifier import SimpleClassifier
 from util import data_reader
 from util.data_reader import BAD_QUALITY, GOOD_QUALITY
 
@@ -28,7 +28,7 @@ class OptunaTrainer:
         batch_size = trial.suggest_categorical("batch_size", [32, 128])
         autoencoder = train_AE.train_ae(autoencoder, self.gq_train_ae, epochs=epochs, lr=lr, batch_size=batch_size)
 
-        classifier = Classifier()
+        classifier = SimpleClassifier()
         classifier.train(autoencoder, self.slices_for_train_classifier, self.classes_for_train_classifier)
 
         predictions = classifier.classify(autoencoder, self.slices_test)
@@ -65,4 +65,4 @@ def main(n_trials):
 
 
 if __name__ == '__main__':
-    main(n_trials=50)
+    main(n_trials=1000)

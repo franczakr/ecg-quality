@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 from ae import train_AE
 from ae.AESimple import AESimple
-from classifier.classifier import Classifier
+from classifier.simple_classifier import SimpleClassifier
 from util import data_reader
 from util.data_reader import BAD_QUALITY, GOOD_QUALITY
 from util.persistence import save_model, load_model
@@ -30,7 +30,7 @@ def main(train: bool):
     else:
         autoencoder = load_model(autoencoder)
 
-    classifier = Classifier()
+    classifier = SimpleClassifier()
 
     gq_train_classifier, gq_test = train_test_split(slices_gq, train_size=0.3)
     bq_train_classifier, bq_test = train_test_split(slices_bq, train_size=0.3)

@@ -6,7 +6,7 @@ from util import config
 from util.data_reader import GOOD_QUALITY, BAD_QUALITY
 
 
-class Classifier:
+class HistogramClassifier:
 
     def __init__(self):
         self.treshold = None
