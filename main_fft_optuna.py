@@ -3,10 +3,10 @@ import optuna
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
-from basic import AETrainer
-from basic.ae.AESimpleOptuna import AESimpleOptuna
-from basic.classifier.simple_classifier import SimpleClassifier
-from basic.AETrainer import AETrainer
+from basic_fft import AETrainer
+from basic_fft.ae.AESimpleOptuna import AESimpleOptuna
+from basic_fft.classifier.simple_classifier import SimpleClassifier
+from basic_fft.AETrainer import AETrainer
 from preprocess import PREPRECESSED_FILENAME
 from util import data_reader, persistence
 from util.data_reader import BAD_QUALITY, GOOD_QUALITY
@@ -73,4 +73,4 @@ def main(n_trials):
 
 
 if __name__ == '__main__':
-    main(n_trials=1000)
+    main(n_trials=100)

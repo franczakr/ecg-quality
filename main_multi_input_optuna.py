@@ -1,15 +1,18 @@
+import argparse
+
 import numpy as np
 import optuna
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 from sklearn.model_selection import train_test_split
 
-from basic import AETrainer
-from basic.ae.AESimpleOptuna import AESimpleOptuna
-from basic.classifier.simple_classifier import SimpleClassifier
-from basic.AETrainer import AETrainer
-from preprocess import PREPRECESSED_FILENAME
-from util import data_reader, persistence
+from multiinput import AETrainerMultiInput
+from multiinput.ae.AEMultiinput import AEMultiInput
+from multiinput.ae.AEMultiinputOptuna import AEMultiInputOptuna
+from multiinput.classifier.simple_classifier_multi_input import SimpleClassifierMultiInput
+from multiinput.AETrainerMultiInput import AETrainerMultiInput
+from util import data_reader
 from util.data_reader import BAD_QUALITY, GOOD_QUALITY
+from util.persistence import save_model, load_model
 
 
 class OptunaTrainer:
@@ -23,14 +26,14 @@ class OptunaTrainer:
         self.gq_train_ae = gq_train_ae
 
     def train(self, trial: optuna.trial.Trial):
-        autoencoder = AESimpleOptuna(trial)
+        autoencoder = AEMultiInputOptuna(trial)
 
         epochs = trial.suggest_int('epochs', 5, 100)
         lr = trial.suggest_float("lr", 0, 1e-1)
         batch_size = trial.suggest_categorical("batch_size", [32, 128])
-        autoencoder = AETrainer.train(autoencoder, self.gq_train_ae, epochs=epochs, lr=lr, batch_size=batch_size)
+        autoencoder = AETrainerMultiInput.train(autoencoder, self.gq_train_ae, epochs=epochs, lr=lr, batch_size=batch_size)
 
-        classifier = SimpleClassifier()
+        classifier = SimpleClassifierMultiInput()
         classifier.train(autoencoder, self.slices_for_train_classifier, self.classes_for_train_classifier)
 
         predictions = classifier.classify(autoencoder, self.slices_test)
@@ -41,29 +44,23 @@ class OptunaTrainer:
 
 
 def main(n_trials):
-    slices, classes = persistence.load_object(PREPRECESSED_FILENAME)
-    # slices, classes = data_reader.load_slices_from_csv()
+    slices, classes = data_reader.load_slices_from_csv()
     classes = np.array([BAD_QUALITY if x == '~' else GOOD_QUALITY for x in classes])
 
     slices_gq = [s for s in list(zip(slices, classes)) if s[1] == data_reader.GOOD_QUALITY]
     slices_bq = [s for s in list(zip(slices, classes)) if s[1] == data_reader.BAD_QUALITY]
 
-    gq_train_classifier, slices_gq = train_test_split(slices_gq, train_size=2000)
-    bq_train_classifier, slices_bq = train_test_split(slices_bq, train_size=2000)
+    gq_train_ae, slices_gq = train_test_split(slices_gq, train_size=0.4)
+    gq_train_ae = np.asarray([gq[0] for gq in gq_train_ae])
+    gq_train_classifier, gq_test = train_test_split(slices_gq, train_size=0.3)
+    bq_train_classifier, bq_test = train_test_split(slices_bq, train_size=0.3)
     slices_classes_train_classifier = gq_train_classifier + bq_train_classifier
-
-    bq_test = slices_bq
-
-    gq_train_ae, gq_test = train_test_split(slices_gq, train_size=5000, test_size=len(bq_test))
-
     slices_for_train_classifier = np.asarray([s[0] for s in slices_classes_train_classifier])
     classes_for_train_classifier = np.asarray([s[1] for s in slices_classes_train_classifier])
 
     slices_classes_test = gq_test + bq_test
     slices_test = np.asarray([s[0] for s in slices_classes_test])
     classes_test = np.asarray([s[1] for s in slices_classes_test])
-
-    gq_train_ae = np.asarray([gq[0] for gq in gq_train_ae])
 
     t = OptunaTrainer(gq_train_ae, slices_for_train_classifier, classes_for_train_classifier, slices_test, classes_test)
 

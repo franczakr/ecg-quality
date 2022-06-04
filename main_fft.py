@@ -4,19 +4,19 @@ import numpy as np
 from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
 from sklearn.model_selection import train_test_split
 
-from basic import AETrainer
-from basic.ae.AESimple import AESimple
-from basic.classifier.simple_classifier import SimpleClassifier
-from basic.AETrainer import AETrainer
-from preprocess import PREPRECESSED_FILENAME
-from util import data_reader, persistence
+from basic.classifier.histogram_classifier import HistogramClassifier
+from basic_fft import AETrainer
+from basic_fft.ae.AESimple import AESimple
+from basic_fft.classifier.simple_classifier import SimpleClassifier
+from basic_fft.AETrainer import AETrainer
+from util import data_reader
 from util.data_reader import BAD_QUALITY, GOOD_QUALITY
 from util.persistence import save_model, load_model
 
 
 def main(train: bool):
-    slices, classes = persistence.load_object(PREPRECESSED_FILENAME)
-    # slices, classes = data_reader.load_slices_from_csv()
+    # slices, classes = persistence.load_object(PREPRECESSED_FILENAME)
+    slices, classes = data_reader.load_slices_from_csv()
     classes = np.array([BAD_QUALITY if x == '~' else GOOD_QUALITY for x in classes])
 
     slices_gq = [s for s in list(zip(slices, classes)) if s[1] == data_reader.GOOD_QUALITY]
@@ -32,10 +32,10 @@ def main(train: bool):
     else:
         autoencoder = load_model(autoencoder)
 
-    classifier = SimpleClassifier()
+    classifier = HistogramClassifier()
 
-    gq_train_classifier, gq_test = train_test_split(slices_gq, train_size=2000)
-    bq_train_classifier, bq_test = train_test_split(slices_bq, train_size=2000)
+    gq_train_classifier, gq_test = train_test_split(slices_gq, train_size=0.3)
+    bq_train_classifier, bq_test = train_test_split(slices_bq, train_size=0.3)
 
     slices_classes_train_classifier = gq_train_classifier + bq_train_classifier
     slices_for_train_classifier = np.asarray([s[0] for s in slices_classes_train_classifier])

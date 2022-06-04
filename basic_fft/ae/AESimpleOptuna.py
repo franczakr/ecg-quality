@@ -12,11 +12,11 @@ class AESimpleOptuna(nn.Module):
         encoder_layers = []
         decoder_layers = []
 
-        n_layers = trial.suggest_int('n_layers', 1, 8)
+        n_layers = 1
 
         in_features = 100
         for i in range(n_layers):
-            out_features = trial.suggest_int(f'n_units_l{i}', 10, 1000)
+            out_features = trial.suggest_int(f'n_units_l{i}', 10, 100)
 
             encoder_layers.append(nn.Linear(in_features, out_features))
 
