@@ -16,7 +16,7 @@ class AEMultiInputOptuna(nn.Module):
 
         def loss(input, output):
             loss = 0
-            loss_func = nn.MSELoss()
+            loss_func = nn.L1Loss()
             for i in range(len(input)):
                 loss += loss_multiplier[i] * loss_func(input[i], output[i])
             return loss

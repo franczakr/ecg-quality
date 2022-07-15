@@ -7,7 +7,7 @@ class AESimpleOptuna(nn.Module):
     def __init__(self, trial: optuna.Trial):
         super().__init__()
 
-        self.loss_func = nn.MSELoss()
+        self.loss_func = nn.L1Loss()
 
         encoder_layers = []
         decoder_layers = []

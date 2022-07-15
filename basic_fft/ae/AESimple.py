@@ -6,7 +6,7 @@ class AESimple(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.loss_func = nn.MSELoss()
+        self.loss_func = nn.L1Loss()
 
         self.encoder_layer_1 = nn.Linear(in_features=100,
                                          out_features=125)
