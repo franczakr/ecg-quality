@@ -99,7 +99,6 @@ class HearthRateCalculator:
                         self.r_locs.append(r_max)
 
     def find_t_wave(self, peak_val, RRn, ind, prev_ind):
-
         if self.m_win[peak_val] >= self.Threshold_I1:
             if ind > 0 and 0.20 < RRn < 0.36:
                 curr_slope = max(np.diff(self.m_win[peak_val - round(self.win_150ms / 2): peak_val + 1]))
@@ -128,12 +127,6 @@ class HearthRateCalculator:
             self.NPKF = 0.125 * self.b_pass[ind] + 0.875 * self.NPKF
 
     def adjust_thresholds(self, peak_val, ind):
-        '''
-        Adjust Noise and Signal Thresholds During Learning Phase
-        :param peak_val: peak location in consideration
-        :param ind: current index in peaks array
-        '''
-
         if self.m_win[peak_val] >= self.Threshold_I1:
             self.SPKI = 0.125 * self.m_win[peak_val] + 0.875 * self.SPKI
 
@@ -151,10 +144,6 @@ class HearthRateCalculator:
             self.NPKF = 0.125 * self.b_pass[ind] + 0.875 * self.NPKF
 
     def update_thresholds(self):
-        '''
-        Update Noise and Signal Thresholds for next iteration
-        '''
-
         self.Threshold_I1 = self.NPKI + 0.25 * (self.SPKI - self.NPKI)
         self.Threshold_F1 = self.NPKF + 0.25 * (self.SPKF - self.NPKF)
         self.Threshold_I2 = 0.5 * self.Threshold_I1
@@ -162,10 +151,6 @@ class HearthRateCalculator:
         self.T_wave = False
 
     def ecg_searchback(self):
-        '''
-        Searchback in ECG signal to increase efficiency
-        '''
-
         x_max = None
         self.r_locs = np.unique(np.array(self.r_locs).astype(int))
 
@@ -222,7 +207,9 @@ class HearthRateCalculator:
         return np.unique(np.array(self.result))
 
     def calc_hearth_rate(self):
-        return (60 * self.freq) / np.average(np.diff(self.find_r_peaks()))
+        beat_times = np.diff(self.find_r_peaks())
+        beat_times = beat_times[(0.6 * np.median(beat_times) < beat_times) & (beat_times < 1.7 * np.median(beat_times))]
+        return (60 * self.freq) / np.average(beat_times)
 
     class PanTompkinsQRS:
 
@@ -296,7 +283,7 @@ class HearthRateCalculator:
 
         def moving_window_integration(self, signal, freq):
             result = signal.copy()
-            win_size = round(0.150 * freq)  # 150 ms
+            win_size = round(0.150 * freq)
             sum = 0
 
             for i in range(win_size):

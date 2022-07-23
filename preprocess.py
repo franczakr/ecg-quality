@@ -1,3 +1,4 @@
+import argparse
 from typing import List
 
 import numpy as np
@@ -5,31 +6,37 @@ from scipy.signal import medfilt, resample
 
 from util import persistence
 from util.data_reader import load_train_data_and_labels
+from util.hearth_rate_calculator import HearthRateCalculator
 
 PREPRECESSED_FILENAME = 'preprocessed.pkl'
+PREPRECESSED_FILENAME_HR = 'preprocessed_hr.pkl'
 
-SAMPLING_RATE = 125
 ORIGINAL_SAMPLING_RATE = 300
-
-POSITION_OF_MAX = 200  # position of the sample with the greatest abs amplitude [ms]
 
 BASELINE_FILTER_LEN_T = 600  # [ms]
 BASELINE_FILTER_LEN_QRS_P = 200  # [ms]
 
-IDX_OF_PEAK = int(POSITION_OF_MAX / 1000.0 * SAMPLING_RATE)
-
-SLICE_LENGTH = int(0.8 * SAMPLING_RATE)  # 0.8 second based on sampling rate
+IDX_OF_PEAK = 20
+SLICE_LENGTH = 100
 CONTEXT_LEN = int(round(2.5 * SLICE_LENGTH))
 
 
-def split_into_slices(fragments: List[np.ndarray], classes: List[int]) -> (np.ndarray, np.ndarray, np.ndarray, int):
+def split_into_slices(fragments: List[np.ndarray], classes: List[int], use_hearth_rate: bool) -> (np.ndarray, np.ndarray, np.ndarray, int):
     fragments_sliced = []
     fragments_sliced_with_context = []
     slice_counters = []
 
     for fragment in fragments:
-        fragment = resample(fragment, int(SAMPLING_RATE * len(fragment) / ORIGINAL_SAMPLING_RATE))
-        fragment = _cancel_baseline(fragment)
+
+        if use_hearth_rate:
+            hr = HearthRateCalculator(fragment, ORIGINAL_SAMPLING_RATE)
+            heart_rate = hr.calc_hearth_rate()
+            sampling_rate = SLICE_LENGTH * heart_rate / 60
+        else:
+            sampling_rate = 125
+
+        fragment = resample(fragment, int(sampling_rate * len(fragment) / ORIGINAL_SAMPLING_RATE))
+        fragment = _cancel_baseline(fragment, sampling_rate)
         fragment = _subtract_mean(fragment)
         fragment = np.clip(fragment, -6000, 6000)
         slices, slices_with_context = _generate_slices(fragment)
@@ -100,35 +107,41 @@ def _subtract_mean(data):
     return data - data.mean()
 
 
-def _cancel_baseline(signal):
+def _cancel_baseline(signal, sampling_rate):
     # T - wave
-    filtered_stage1 = _apply_medfilt(signal, BASELINE_FILTER_LEN_T)
+    filtered_stage1 = _apply_medfilt(signal, BASELINE_FILTER_LEN_T, sampling_rate)
 
     # QRS - complex and P - wave
-    filtered_stage2 = _apply_medfilt(filtered_stage1, BASELINE_FILTER_LEN_QRS_P)
+    filtered_stage2 = _apply_medfilt(filtered_stage1, BASELINE_FILTER_LEN_QRS_P, sampling_rate)
 
     return filtered_stage2
 
 
-def _apply_medfilt(signal, length_ms):
-    length = int(length_ms / 1000.0 * SAMPLING_RATE)
+def _apply_medfilt(signal, length_ms, sampling_rate):
+    length = int(length_ms / 1000.0 * sampling_rate)
+    if length % 2 == 0:
+        length += 1
     filt_result = medfilt(signal, kernel_size=length)
     return signal - filt_result
 
 
-def main():
+def main(use_hearth_rate: bool):
     train_data_with_labels = load_train_data_and_labels()
 
     print("Loaded train dataset")
 
     train_data = [item[1] for item in train_data_with_labels]
     train_labels = [item[2] for item in train_data_with_labels]
-    slices, classes = split_into_slices(train_data, train_labels)
+    slices, classes = split_into_slices(train_data, train_labels, use_hearth_rate)
     print("Split dataset to fragments")
 
-    persistence.save_object(PREPRECESSED_FILENAME, (slices, classes))
+    persistence.save_object(PREPRECESSED_FILENAME_HR if use_hearth_rate else PREPRECESSED_FILENAME, (slices, classes))
     print("Saved preprocessed data")
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--use_hearth_rate', action="store_true")
+    args = parser.parse_args()
+
+    main(args.use_hearth_rate)
