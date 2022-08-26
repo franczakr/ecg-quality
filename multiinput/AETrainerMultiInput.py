@@ -13,34 +13,36 @@ from util import config
 
 class AETrainerMultiInput:
 
-    @staticmethod
-    def train(autoencoder: nn.Module, train_dataset: np.ndarray, epochs: int, lr: float = 1e-3,
-              batch_size: int = 128) -> nn.Module:
+    def __init__(self, epochs: int = 25, lr: float = 1e-3, batch_size: int = 128):
+        self.epochs = epochs
+        self.lr = lr
+        self.batch_size = batch_size
+
+    def train(self, autoencoder: nn.Module, train_dataset: np.ndarray) -> nn.Module:
         device = config.DEVICE
 
         autoencoder = autoencoder.to(device)
 
-        optimizer = optim.Adam(autoencoder.parameters(), lr=lr)
+        optimizer = optim.Adam(autoencoder.parameters(), lr=self.lr)
 
         train_loader = DataLoader(
-            TensorDataset(torch.tensor(train_dataset)), batch_size=batch_size, shuffle=True, pin_memory=True
+            TensorDataset(torch.tensor(train_dataset)), batch_size=self.batch_size, shuffle=True, pin_memory=True
         )
 
         # print("AE training started")
 
-        for epoch in range(epochs):
+        for epoch in range(self.epochs):
             loss = 0
 
             for input_batch in train_loader:
                 input_batch = input_batch[0].to(device)
                 optimizer.zero_grad()
-                input_batch_signal = input_batch
                 input_batch_part_1 = torch.stack([i[:25] for i in input_batch]).to(device)
                 input_batch_part_2 = torch.stack([i[25:50] for i in input_batch]).to(device)
                 input_batch_part_3 = torch.stack([i[50:75] for i in input_batch]).to(device)
                 input_batch_part_4 = torch.stack([i[75:] for i in input_batch]).to(device)
-                input_batch = (input_batch_signal, input_batch_part_1, input_batch_part_2, input_batch_part_3, input_batch_part_4)
-                output_batch = autoencoder(input_batch_signal, input_batch_part_1, input_batch_part_2, input_batch_part_3, input_batch_part_4)
+                input_batch = (input_batch_part_1, input_batch_part_2, input_batch_part_3, input_batch_part_4)
+                output_batch = autoencoder(input_batch_part_1, input_batch_part_2, input_batch_part_3, input_batch_part_4)
                 train_loss = autoencoder.loss_func(output_batch, input_batch)
                 train_loss.backward()
                 optimizer.step()

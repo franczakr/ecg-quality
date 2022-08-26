@@ -8,8 +8,10 @@ from util import persistence
 from util.data_reader import load_train_data_and_labels
 from util.hearth_rate_calculator import HearthRateCalculator
 
-PREPRECESSED_FILENAME = 'preprocessed.pkl'
-PREPRECESSED_FILENAME_HR = 'preprocessed_hr.pkl'
+PREPROCESSED_FILENAME = 'preprocessed.pkl'
+PREPROCESSED_FILENAME_HR = 'preprocessed_hr.pkl'
+PREPROCESSED_FILENAME_TRAIN = 'preprocessed_train.pkl'
+PREPROCESSED_FILENAME_HR_TRAIN = 'preprocessed_hr_train.pkl'
 
 ORIGINAL_SAMPLING_RATE = 300
 
@@ -135,7 +137,7 @@ def main(use_hearth_rate: bool):
     slices, classes = split_into_slices(train_data, train_labels, use_hearth_rate)
     print("Split dataset to fragments")
 
-    persistence.save_object(PREPRECESSED_FILENAME_HR if use_hearth_rate else PREPRECESSED_FILENAME, (slices, classes))
+    persistence.save_object(PREPROCESSED_FILENAME_HR if use_hearth_rate else PREPROCESSED_FILENAME, (slices, classes))
     print("Saved preprocessed data")
 
 

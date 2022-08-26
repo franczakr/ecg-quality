@@ -48,13 +48,12 @@ class SimpleClassifierMultiInput:
         autoencoder.eval()
         with torch.no_grad():
             input = torch.tensor(slices).to(device)
-            input_signal = input
             input_part_1 = torch.stack([i[:25] for i in input]).to(device)
             input_part_2 = torch.stack([i[25:50] for i in input]).to(device)
             input_part_3 = torch.stack([i[50:75] for i in input]).to(device)
             input_part_4 = torch.stack([i[75:] for i in input]).to(device)
-            input = (input_signal, input_part_1, input_part_2, input_part_3, input_part_4)
-            output = autoencoder(input_signal, input_part_1, input_part_2, input_part_3, input_part_4)
+            input = (input_part_1, input_part_2, input_part_3, input_part_4)
+            output = autoencoder(input_part_1, input_part_2, input_part_3, input_part_4)
             loss = []
             for j in range(len(input[0])):
                 i = [input[y][j] for y in range(len(input))]

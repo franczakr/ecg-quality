@@ -12,25 +12,27 @@ from util import config
 
 
 class AETrainer:
+    def __init__(self, epochs: int = 25, lr: float = 1e-3, batch_size: int = 128):
+        self.epochs = epochs
+        self.lr = lr
+        self.batch_size = batch_size
 
-    @staticmethod
-    def train(autoencoder: nn.Module, train_dataset: np.ndarray, epochs: int, lr: float = 1e-3,
-              batch_size: int = 128) -> nn.Module:
+    def train(self, autoencoder: nn.Module, train_dataset: np.ndarray) -> nn.Module:
         device = config.DEVICE
 
         autoencoder = autoencoder.to(device)
 
-        optimizer = optim.Adam(autoencoder.parameters(), lr=lr)
+        optimizer = optim.Adam(autoencoder.parameters(), lr=self.lr)
 
         train_dataset = np.abs(np.array([fft(i) for i in train_dataset]))
 
         train_loader = DataLoader(
-            TensorDataset(torch.tensor(train_dataset)), batch_size=batch_size, shuffle=True, pin_memory=True
+            TensorDataset(torch.tensor(train_dataset)), batch_size=self.batch_size, shuffle=True, pin_memory=True
         )
 
         # print("AE training started")
 
-        for epoch in range(epochs):
+        for epoch in range(self.epochs):
             loss = 0
 
             for input_batch in train_loader:

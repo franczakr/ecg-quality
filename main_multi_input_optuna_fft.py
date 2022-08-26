@@ -1,18 +1,13 @@
 import argparse
 
-import numpy as np
 import optuna
-from sklearn.metrics import confusion_matrix, f1_score, accuracy_score, recall_score, precision_score
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 from multiinput_fft import AETrainerMultiInput
-from multiinput_fft.ae.AEMultiinput import AEMultiInput
+from multiinput_fft.AETrainerMultiInput import AETrainerMultiInput
 from multiinput_fft.ae.AEMultiinputOptuna import AEMultiInputOptuna
 from multiinput_fft.classifier.simple_classifier_multi_input import SimpleClassifierMultiInput
-from multiinput_fft.AETrainerMultiInput import AETrainerMultiInput
-from util import data_reader
-from util.data_reader import BAD_QUALITY, GOOD_QUALITY
-from util.persistence import save_model, load_model
+from util import classification
 
 
 class OptunaTrainer:
@@ -28,10 +23,10 @@ class OptunaTrainer:
     def train(self, trial: optuna.trial.Trial):
         autoencoder = AEMultiInputOptuna(trial)
 
-        epochs = trial.suggest_int('epochs', 5, 100)
+        epochs = trial.suggest_int('epochs', 5, 50)
         lr = trial.suggest_float("lr", 0, 1e-1)
         batch_size = trial.suggest_categorical("batch_size", [32, 128])
-        autoencoder = AETrainerMultiInput.train(autoencoder, self.gq_train_ae, epochs=epochs, lr=lr, batch_size=batch_size)
+        autoencoder = AETrainerMultiInput(epochs=epochs, lr=lr, batch_size=batch_size).train(autoencoder, self.gq_train_ae)
 
         classifier = SimpleClassifierMultiInput()
         classifier.train(autoencoder, self.slices_for_train_classifier, self.classes_for_train_classifier)
@@ -43,31 +38,18 @@ class OptunaTrainer:
         return accuracy
 
 
-def main(n_trials):
-    slices, classes = data_reader.load_slices_from_csv()
-    classes = np.array([BAD_QUALITY if x == '~' else GOOD_QUALITY for x in classes])
+def main(use_hearth_rate, n_trials):
+    slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test = fragment_loader.load_fragments(use_hearth_rate)
 
-    slices_gq = [s for s in list(zip(slices, classes)) if s[1] == data_reader.GOOD_QUALITY]
-    slices_bq = [s for s in list(zip(slices, classes)) if s[1] == data_reader.BAD_QUALITY]
-
-    gq_train_ae, slices_gq = train_test_split(slices_gq, train_size=0.4)
-    gq_train_ae = np.asarray([gq[0] for gq in gq_train_ae])
-    gq_train_classifier, gq_test = train_test_split(slices_gq, train_size=0.3)
-    bq_train_classifier, bq_test = train_test_split(slices_bq, train_size=0.3)
-    slices_classes_train_classifier = gq_train_classifier + bq_train_classifier
-    slices_for_train_classifier = np.asarray([s[0] for s in slices_classes_train_classifier])
-    classes_for_train_classifier = np.asarray([s[1] for s in slices_classes_train_classifier])
-
-    slices_classes_test = gq_test + bq_test
-    slices_test = np.asarray([s[0] for s in slices_classes_test])
-    classes_test = np.asarray([s[1] for s in slices_classes_test])
-
-    t = OptunaTrainer(gq_train_ae, slices_for_train_classifier, classes_for_train_classifier, slices_test, classes_test)
+    t = OptunaTrainer(slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test)
 
     study = optuna.create_study(direction='maximize')
     study.optimize(t.train, n_trials=n_trials)
-    print(optuna.importance.get_param_importances(study))
 
 
 if __name__ == '__main__':
-    main(n_trials=1000)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--use-hearth-rate', action="store_true")
+    args = parser.parse_args()
+
+    main(args.use_hearth_rate, n_trials=300)

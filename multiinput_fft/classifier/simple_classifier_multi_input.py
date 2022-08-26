@@ -50,7 +50,7 @@ class SimpleClassifierMultiInput:
         with torch.no_grad():
             input = torch.tensor(slices).to(device)
             input_signal = input
-            input_fft = torch.tensor([np.abs(fft(i.numpy())) for i in input]).float().to(device)
+            input_fft = torch.tensor(np.asarray([np.abs(fft(i.numpy())) for i in input])).float().to(device)
             input = (input_signal, input_fft)
             output = autoencoder(input_signal, input_fft)
             loss = []
