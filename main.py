@@ -1,6 +1,6 @@
 import argparse
 
-from classification.basic.AETrainer import AETrainer
+from classification.basic.SimpleFftAETrainer import SimpleAETrainer
 from classification.basic.ae.AESimple import AESimple
 from classification.basic.classifier.simple_classifier import SimpleClassifier
 
@@ -10,7 +10,7 @@ from util.ecg_classifier import EcgClassifier
 def main(train: bool, use_hearth_rate: bool):
     EcgClassifier().train_test(AESimple(hidden_layer_width=10),
                                SimpleClassifier(),
-                               AETrainer(epochs=64, lr=0.25, batch_size=128) if train else None,
+                               SimpleAETrainer(epochs=64, lr=0.25, batch_size=128) if train else None,
                                use_hearth_rate)
 
 

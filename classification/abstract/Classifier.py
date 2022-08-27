@@ -14,5 +14,5 @@ class Classifier(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def classify(self, autoencoder: Autoencoder, slices: np.ndarray) -> (np.ndarray, np.ndarray):
+    def classify(self, autoencoder: Autoencoder, slices: np.ndarray) -> np.ndarray:
         pass

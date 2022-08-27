@@ -4,4 +4,7 @@ from torch import nn
 
 
 class Autoencoder(nn.Module, abc.ABC):
-    pass
+
+    @abc.abstractmethod
+    def forward(self, *input):
+        pass

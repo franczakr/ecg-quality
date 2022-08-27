@@ -1,11 +1,10 @@
-import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
 
 from classification.abstract.Autoencoder import Autoencoder
 from classification.abstract.Classifier import Classifier
 from classification.abstract.Trainer import Trainer
-from preprocess import PREPROCESSED_FILENAME_TRAIN, PREPROCESSED_FILENAME, PREPROCESSED_FILENAME_HR_TRAIN, \
+from util.config import PREPROCESSED_FILENAME_TRAIN, PREPROCESSED_FILENAME, PREPROCESSED_FILENAME_HR_TRAIN, \
     PREPROCESSED_FILENAME_HR
 from util import persistence, data_reader
 from util.data_reader import BAD_QUALITY, GOOD_QUALITY
@@ -30,16 +29,12 @@ class EcgClassifier:
         gq_train_classifier, gq_test = slices_gq[:1000], slices_gq[1000:3000]
         bq_train_classifier, bq_test = slices_bq[:1000], slices_bq[1000:3000]
 
-        slices_classes_train_classifier = gq_train_classifier + bq_train_classifier
-        slices_for_train_classifier = np.asarray([s[0] for s in slices_classes_train_classifier])
-        classes_for_train_classifier = np.asarray([s[1] for s in slices_classes_train_classifier])
-        slices_classes_test = gq_test + bq_test
-        slices_test = np.asarray([s[0] for s in slices_classes_test])
-        classes_test = np.asarray([s[1] for s in slices_classes_test])
+        slices_for_train_classifier, classes_for_train_classifier = list(zip(*(gq_train_classifier + bq_train_classifier)))
+        slices_test, classes_test = list(zip(*(gq_test + bq_test)))
 
         return slices_train, slices_for_train_classifier, classes_for_train_classifier, slices_test, classes_test
 
-    def train_test(self, autoencoder: Autoencoder, classifier: Classifier, trainer: Trainer, use_hearth_rate: bool):
+    def train_test(self, autoencoder: Autoencoder, classifier: Classifier, trainer: Trainer, use_hearth_rate: bool=False):
         slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test = self.load_fragments(
             use_hearth_rate)
 
@@ -51,7 +46,7 @@ class EcgClassifier:
 
         classifier.train(autoencoder, slices_train_classifier, classes_train_classifier)
 
-        loss, predictions = classifier.classify(autoencoder, slices_test)
+        predictions = classifier.classify(autoencoder, slices_test)
 
         print("CLASSIER RESULTS:")
         TN, FP, FN, TP = confusion_matrix(classes_test, predictions).ravel()

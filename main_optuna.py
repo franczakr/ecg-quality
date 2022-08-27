@@ -3,7 +3,7 @@ import argparse
 import optuna
 from sklearn.metrics import accuracy_score
 
-from classification.basic.AETrainer import AETrainer
+from classification.basic.SimpleFftAETrainer import SimpleAETrainer
 from classification.basic.ae.AESimpleOptuna import AESimpleOptuna
 from classification.basic.classifier.simple_classifier import SimpleClassifier
 from util.ecg_classifier import EcgClassifier
@@ -25,7 +25,7 @@ class OptunaTrainer:
         epochs = trial.suggest_int('epochs', 5, 100)
         lr = trial.suggest_float("lr", 0, 1e-1)
         batch_size = trial.suggest_categorical("batch_size", [32, 128])
-        autoencoder = AETrainer(epochs=epochs, lr=lr, batch_size=batch_size).train(autoencoder, self.gq_train_ae)
+        autoencoder = SimpleAETrainer(epochs=epochs, lr=lr, batch_size=batch_size).train(autoencoder, self.gq_train_ae)
 
         classifier = SimpleClassifier()
         classifier.train(autoencoder, self.slices_for_train_classifier, self.classes_for_train_classifier)

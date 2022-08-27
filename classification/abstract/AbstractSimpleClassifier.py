@@ -33,9 +33,9 @@ class AbstractSimpleClassifier(Classifier, abc.ABC):
         self.threshold = best_t
         print(f"Classifier trained. Threshold: {self.threshold}")
 
-    def classify(self, autoencoder: Autoencoder, slices: np.ndarray) -> (np.ndarray, np.ndarray):
+    def classify(self, autoencoder: Autoencoder, slices: np.ndarray) -> np.ndarray:
         loss = self._get_loss(autoencoder, slices)
-        return loss, [BAD_QUALITY if l > self.threshold else GOOD_QUALITY for l in loss]
+        return np.array([BAD_QUALITY if l > self.threshold else GOOD_QUALITY for l in loss])
 
     @abc.abstractmethod
     def _get_loss(self, autoencoder: Autoencoder, slices: np.ndarray) -> np.ndarray:

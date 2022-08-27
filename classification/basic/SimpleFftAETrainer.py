@@ -12,7 +12,7 @@ from classification.abstract.Trainer import Trainer
 from util import config
 
 
-class AETrainer(Trainer):
+class SimpleAETrainer(Trainer):
 
     def train(self, autoencoder: Autoencoder, train_dataset: np.ndarray) -> Autoencoder:
         device = config.DEVICE
