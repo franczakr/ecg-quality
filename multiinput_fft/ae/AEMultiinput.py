@@ -4,10 +4,12 @@ import torch.nn as nn
 
 class AEMultiInput(nn.Module):
 
-    def __init__(self):
+    def __init__(self, loss_multiplier, signal_layer_width, fft_layer_width, final_layer_width):
         super().__init__()
 
-        loss_multiplier = [2, 6]
+        self.signal_layer_width = signal_layer_width
+        self.fft_layer_width = fft_layer_width
+        self.final_layer_width = final_layer_width
 
         def loss(input, output):
             loss = 0
@@ -19,23 +21,23 @@ class AEMultiInput(nn.Module):
         self.loss_func = loss
 
         self.encoder_layer_signal = nn.Linear(in_features=100,
-                                              out_features=55)
+                                              out_features=signal_layer_width)
 
         self.encoder_layer_fft = nn.Linear(in_features=100,
-                                             out_features=12)
+                                             out_features=fft_layer_width)
 
-        self.encoder_layer_final = nn.Linear(in_features=67,
-                                             out_features=139)
+        self.encoder_layer_final = nn.Linear(in_features=signal_layer_width+fft_layer_width,
+                                             out_features=final_layer_width)
 
         ##############################################
 
-        self.decoder_layer_final = nn.Linear(in_features=139,
-                                             out_features=67)
+        self.decoder_layer_final = nn.Linear(in_features=final_layer_width,
+                                             out_features=signal_layer_width+fft_layer_width)
 
-        self.decoder_layer_signal = nn.Linear(in_features=55,
+        self.decoder_layer_signal = nn.Linear(in_features=signal_layer_width,
                                               out_features=100)
 
-        self.decoder_layer_fft = nn.Linear(in_features=12,
+        self.decoder_layer_fft = nn.Linear(in_features=fft_layer_width,
                                              out_features=100)
 
     def forward(self, signal, fft):
@@ -53,7 +55,7 @@ class AEMultiInput(nn.Module):
 
         reconstructed = self.decoder_layer_final(encoded)
 
-        r_signal, r_fft = torch.split(reconstructed, [55, 12], dim=1)
+        r_signal, r_fft = torch.split(reconstructed, [self.signal_layer_width, self.fft_layer_width], dim=1)
 
         reconstructed_signal = self.decoder_layer_signal(r_signal)
         reconstructed_fft = self.decoder_layer_fft(r_fft)

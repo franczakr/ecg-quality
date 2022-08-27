@@ -4,11 +4,15 @@ from multiinput_fft import AETrainerMultiInput
 from multiinput_fft.AETrainerMultiInput import AETrainerMultiInput
 from multiinput_fft.ae.AEMultiinput import AEMultiInput
 from multiinput_fft.classifier.simple_classifier_multi_input import SimpleClassifierMultiInput
-from util.classification import train_test
+from util.ecg_classifier import EcgClassifier
 
 
 def main(train: bool, use_hearth_rate: bool):
-    train_test(AEMultiInput(), SimpleClassifierMultiInput(), AETrainerMultiInput() if train else None, use_hearth_rate)
+    EcgClassifier().train_test(
+        AEMultiInput(signal_layer_width=55, fft_layer_width=12, final_layer_width=139, loss_multiplier=[2, 6]),
+        SimpleClassifierMultiInput(),
+        AETrainerMultiInput(lr=0.019, epochs=29, batch_size=32) if train else None,
+        use_hearth_rate)
 
 
 if __name__ == '__main__':

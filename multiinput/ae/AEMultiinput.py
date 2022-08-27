@@ -4,50 +4,53 @@ import torch.nn as nn
 
 class AEMultiInput(nn.Module):
 
-    def __init__(self):
+    def __init__(self, loss_multipliers, partial_layers_width, hidden_layer_width):
         super().__init__()
 
-        loss_multiplier = [9, 4, 4, 3]
+        self.partial_layers_width = partial_layers_width
+
+        if len(loss_multipliers) != 4:
+            raise Exception('Wrong loss_multipliers size, should be 4')
 
         def loss(input, output):
             loss = 0
             loss_func = nn.L1Loss()
             for i in range(len(input)):
-                loss += loss_multiplier[i] * loss_func(input[i], output[i])
+                loss += loss_multipliers[i] * loss_func(input[i], output[i])
             return loss
 
         self.loss_func = loss
 
         self.encoder_layer_part1 = nn.Linear(in_features=25,
-                                             out_features=2)
+                                             out_features=partial_layers_width)
 
         self.encoder_layer_part2 = nn.Linear(in_features=25,
-                                             out_features=2)
+                                             out_features=partial_layers_width)
 
         self.encoder_layer_part3 = nn.Linear(in_features=25,
-                                             out_features=2)
+                                             out_features=partial_layers_width)
 
         self.encoder_layer_part4 = nn.Linear(in_features=25,
-                                             out_features=2)
+                                             out_features=partial_layers_width)
 
         self.encoder_layer_final = nn.Linear(in_features=8,
-                                             out_features=15)
+                                             out_features=hidden_layer_width)
 
         ##############################################
 
-        self.decoder_layer_final = nn.Linear(in_features=15,
+        self.decoder_layer_final = nn.Linear(in_features=hidden_layer_width,
                                              out_features=8)
 
-        self.decoder_layer_part1 = nn.Linear(in_features=2,
+        self.decoder_layer_part1 = nn.Linear(in_features=partial_layers_width,
                                              out_features=25)
 
-        self.decoder_layer_part2 = nn.Linear(in_features=2,
+        self.decoder_layer_part2 = nn.Linear(in_features=partial_layers_width,
                                              out_features=25)
 
-        self.decoder_layer_part3 = nn.Linear(in_features=2,
+        self.decoder_layer_part3 = nn.Linear(in_features=partial_layers_width,
                                              out_features=25)
 
-        self.decoder_layer_part4 = nn.Linear(in_features=2,
+        self.decoder_layer_part4 = nn.Linear(in_features=partial_layers_width,
                                              out_features=25)
 
     def forward(self, part1, part2, part3, part4):
@@ -66,7 +69,7 @@ class AEMultiInput(nn.Module):
 
         reconstructed = self.decoder_layer_final(encoded)
 
-        r_part1, r_part2, r_part3, r_part4 = torch.split(reconstructed, [2, 2, 2, 2], dim=1)
+        r_part1, r_part2, r_part3, r_part4 = torch.split(reconstructed, [self.partial_layers_width]*4, dim=1)
 
         reconstructed_part1 = self.decoder_layer_part1(r_part1)
         reconstructed_part2 = self.decoder_layer_part2(r_part2)

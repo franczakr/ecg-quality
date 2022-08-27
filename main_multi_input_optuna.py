@@ -7,7 +7,8 @@ from multiinput import AETrainerMultiInput
 from multiinput.AETrainerMultiInput import AETrainerMultiInput
 from multiinput.ae.AEMultiinputOptuna import AEMultiInputOptuna
 from multiinput.classifier.simple_classifier_multi_input import SimpleClassifierMultiInput
-from util import classification
+from util import ecg_classifier
+from util.ecg_classifier import EcgClassifier
 
 
 class OptunaTrainer:
@@ -26,7 +27,8 @@ class OptunaTrainer:
         epochs = trial.suggest_int('epochs', 5, 100)
         lr = trial.suggest_float("lr", 0, 1e-1)
         batch_size = trial.suggest_categorical("batch_size", [32, 128])
-        autoencoder = AETrainerMultiInput(epochs=epochs, lr=lr, batch_size=batch_size).train(autoencoder, self.gq_train_ae)
+        autoencoder = AETrainerMultiInput(epochs=epochs, lr=lr, batch_size=batch_size).train(autoencoder,
+                                                                                             self.gq_train_ae)
 
         classifier = SimpleClassifierMultiInput()
         classifier.train(autoencoder, self.slices_for_train_classifier, self.classes_for_train_classifier)
@@ -39,7 +41,8 @@ class OptunaTrainer:
 
 
 def main(use_hearth_rate, n_trials):
-    slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test = fragment_loader.load_fragments(use_hearth_rate)
+    slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test = EcgClassifier().load_fragments(
+        use_hearth_rate)
 
     t = OptunaTrainer(slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test)
 

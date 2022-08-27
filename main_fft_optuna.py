@@ -10,7 +10,8 @@ from basic_fft.ae.AESimpleOptuna import AESimpleOptuna
 from basic_fft.classifier.simple_classifier import SimpleClassifier
 from basic_fft.AETrainer import AETrainer
 from preprocess import PREPROCESSED_FILENAME
-from util import data_reader, persistence, classification
+from util import data_reader, persistence, ecg_classifier
+from util.ecg_classifier import EcgClassifier
 from util.data_reader import BAD_QUALITY, GOOD_QUALITY
 
 
@@ -43,7 +44,7 @@ class OptunaTrainer:
 
 
 def main(use_hearth_rate, n_trials):
-    slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test = fragment_loader.load_fragments(use_hearth_rate)
+    slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test = EcgClassifier().load_fragments(use_hearth_rate)
 
     t = OptunaTrainer(slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test)
 

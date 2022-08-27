@@ -4,11 +4,14 @@ from basic import AETrainer
 from basic.AETrainer import AETrainer
 from basic.ae.AESimple import AESimple
 from basic.classifier.simple_classifier import SimpleClassifier
-from util.classification import train_test
+from util.ecg_classifier import EcgClassifier
 
 
 def main(train: bool, use_hearth_rate: bool):
-    train_test(AESimple(), SimpleClassifier(), AETrainer() if train else None, use_hearth_rate)
+    EcgClassifier().train_test(AESimple(hidden_layer_width=10),
+                               SimpleClassifier(),
+                               AETrainer(epochs=64, lr=0.25, batch_size=128) if train else None,
+                               use_hearth_rate)
 
 
 if __name__ == '__main__':

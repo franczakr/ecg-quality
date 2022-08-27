@@ -9,7 +9,7 @@ from util.data_reader import GOOD_QUALITY, BAD_QUALITY
 class HistogramClassifier:
 
     def __init__(self):
-        self.treshold = None
+        self.threshold = None
 
     def train(self, autoencoder: nn.Module, slices: np.ndarray, classes: np.ndarray):
         loss = self._get_loss(autoencoder, slices)
@@ -35,12 +35,12 @@ class HistogramClassifier:
         if index is None:
             raise
 
-        self.treshold = gq_hist[1][index]
-        print(f"Classifier trained. Treshhold: {self.treshold}")
+        self.threshold = gq_hist[1][index]
+        print(f"Classifier trained. Threshold: {self.threshold}")
 
     def classify(self, autoencoder: nn.Module, slices: np.ndarray) -> (np.ndarray, np.ndarray):
         loss = self._get_loss(autoencoder, slices)
-        return [BAD_QUALITY if l > self.treshold else GOOD_QUALITY for l in loss]
+        return loss, [BAD_QUALITY if l > self.threshold else GOOD_QUALITY for l in loss]
 
     def _get_loss(self, autoencoder, slices: np.ndarray):
         device = config.DEVICE

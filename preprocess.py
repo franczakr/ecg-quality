@@ -8,8 +8,8 @@ from util import persistence
 from util.data_reader import load_train_data_and_labels
 from util.hearth_rate_calculator import HearthRateCalculator
 
-PREPROCESSED_FILENAME = 'preprocessed.pkl'
-PREPROCESSED_FILENAME_HR = 'preprocessed_hr.pkl'
+PREPROCESSED_FILENAME = 'preprocessed_1.pkl'
+PREPROCESSED_FILENAME_HR = 'preprocessed_hr_1.pkl'
 PREPROCESSED_FILENAME_TRAIN = 'preprocessed_train.pkl'
 PREPROCESSED_FILENAME_HR_TRAIN = 'preprocessed_hr_train.pkl'
 
@@ -127,8 +127,8 @@ def _apply_medfilt(signal, length_ms, sampling_rate):
     return signal - filt_result
 
 
-def main(use_hearth_rate: bool):
-    train_data_with_labels = load_train_data_and_labels()
+def main(train_data_path: str, use_hearth_rate: bool):
+    train_data_with_labels = load_train_data_and_labels(train_data_path)
 
     print("Loaded train dataset")
 
@@ -143,7 +143,8 @@ def main(use_hearth_rate: bool):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--train_data_path')
     parser.add_argument('--use_hearth_rate', action="store_true")
     args = parser.parse_args()
 
-    main(args.use_hearth_rate)
+    main(args.train_data_path, args.use_hearth_rate)
