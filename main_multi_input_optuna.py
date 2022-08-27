@@ -3,11 +3,9 @@ import argparse
 import optuna
 from sklearn.metrics import accuracy_score
 
-from multiinput import AETrainerMultiInput
-from multiinput.AETrainerMultiInput import AETrainerMultiInput
-from multiinput.ae.AEMultiinputOptuna import AEMultiInputOptuna
-from multiinput.classifier.simple_classifier_multi_input import SimpleClassifierMultiInput
-from util import ecg_classifier
+from classification.multiinput.AETrainerMultiInput import AETrainerMultiInput
+from classification.multiinput.ae.AEMultiinputOptuna import AEMultiInputOptuna
+from classification.multiinput.classifier.simple_classifier_multi_input import SimpleClassifierMultiInput
 from util.ecg_classifier import EcgClassifier
 
 

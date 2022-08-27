@@ -1,9 +1,9 @@
 import argparse
 
-from basic import AETrainer
-from basic.AETrainer import AETrainer
-from basic.ae.AESimple import AESimple
-from basic.classifier.simple_classifier import SimpleClassifier
+from classification.basic.AETrainer import AETrainer
+from classification.basic.ae.AESimple import AESimple
+from classification.basic.classifier.simple_classifier import SimpleClassifier
+
 from util.ecg_classifier import EcgClassifier
 
 

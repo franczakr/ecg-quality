@@ -1,9 +1,8 @@
 import argparse
 
-from multiinput import AETrainerMultiInput
-from multiinput.AETrainerMultiInput import AETrainerMultiInput
-from multiinput.ae.AEMultiinput import AEMultiInput
-from multiinput.classifier.simple_classifier_multi_input import SimpleClassifierMultiInput
+from classification.multiinput.AETrainerMultiInput import AETrainerMultiInput
+from classification.multiinput.ae.AEMultiinput import AEMultiInput
+from classification.multiinput.classifier.simple_classifier_multi_input import SimpleClassifierMultiInput
 from util.ecg_classifier import EcgClassifier
 
 

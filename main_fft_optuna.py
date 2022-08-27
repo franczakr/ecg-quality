@@ -1,18 +1,12 @@
 import argparse
 
-import numpy as np
 import optuna
 from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
 
-from basic_fft import AETrainer
-from basic_fft.ae.AESimpleOptuna import AESimpleOptuna
-from basic_fft.classifier.simple_classifier import SimpleClassifier
-from basic_fft.AETrainer import AETrainer
-from preprocess import PREPROCESSED_FILENAME
-from util import data_reader, persistence, ecg_classifier
+from classification.basic_fft.ae.AESimpleOptuna import AESimpleOptuna
+from classification.basic_fft.classifier.simple_classifier import SimpleClassifier
+from classification.basic_fft.AETrainer import AETrainer
 from util.ecg_classifier import EcgClassifier
-from util.data_reader import BAD_QUALITY, GOOD_QUALITY
 
 
 class OptunaTrainer:

@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
 
+from classification.abstract.Autoencoder import Autoencoder
+from classification.abstract.Classifier import Classifier
+from classification.abstract.Trainer import Trainer
 from preprocess import PREPROCESSED_FILENAME_TRAIN, PREPROCESSED_FILENAME, PREPROCESSED_FILENAME_HR_TRAIN, \
     PREPROCESSED_FILENAME_HR
 from util import persistence, data_reader
@@ -36,7 +39,7 @@ class EcgClassifier:
 
         return slices_train, slices_for_train_classifier, classes_for_train_classifier, slices_test, classes_test
 
-    def train_test(self, autoencoder, classifier,  trainer, use_hearth_rate):
+    def train_test(self, autoencoder: Autoencoder, classifier: Classifier, trainer: Trainer, use_hearth_rate: bool):
         slices_train, slices_train_classifier, classes_train_classifier, slices_test, classes_test = self.load_fragments(
             use_hearth_rate)
 
