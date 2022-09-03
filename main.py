@@ -1,8 +1,8 @@
 import argparse
 
-from classification.basic.SimpleFftAETrainer import SimpleAETrainer
-from classification.basic.ae.AESimple import AESimple
-from classification.basic.classifier.simple_classifier import SimpleClassifier
+from classification.simple.SimpleFftAETrainer import SimpleAETrainer
+from classification.simple.ae.AESimple import AESimple
+from classification.simple.classifier.simple_classifier import SimpleClassifier
 
 from util.ecg_classifier import EcgClassifier
 

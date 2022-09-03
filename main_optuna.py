@@ -3,9 +3,9 @@ import argparse
 import optuna
 from sklearn.metrics import accuracy_score
 
-from classification.basic.SimpleFftAETrainer import SimpleAETrainer
-from classification.basic.ae.AESimpleOptuna import AESimpleOptuna
-from classification.basic.classifier.simple_classifier import SimpleClassifier
+from classification.simple.SimpleFftAETrainer import SimpleAETrainer
+from classification.simple.ae.AESimpleOptuna import AESimpleOptuna
+from classification.simple.classifier.simple_classifier import SimpleClassifier
 from util.ecg_classifier import EcgClassifier
 
 
